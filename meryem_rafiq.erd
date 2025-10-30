@@ -1,164 +1,126 @@
-erdiagram UniversityModel
+erdiagram RcModel
+
 notation=crowsfoot
 
-erdiagram RCModels
-notation=crowsfoot
-
+// Entities
 entity Customer {
-    cust_id: INTEGER key
-    cust_name: VARCHAR(100)
-    cust_address: VARCHAR(200)
-    cust_phone: VARCHAR(20)
-    cust_email: VARCHAR(100)
-    is_subscriber: BOOLEAN
-    credit_card_info: VARCHAR(100)
-}
-
-entity Product {
-    prod_id: INTEGER key
-    prod_name: VARCHAR(100)
-    prod_type: VARCHAR(50)
-    prod_scale: VARCHAR(10)
-    price: DECIMAL
-    min_quantity: INTEGER
-    current_stock: INTEGER
-    category: VARCHAR(50)
-    last_sale_date: DATE
-    manf_id: INTEGER
+    id: UUID key
+    name: string
+    email: string
+    phone: string
+    address: string
+    marketing_source: string
+    is_active: boolean
+    created_at: date
 }
 
 entity Manufacturer {
-    manf_id: INTEGER key
-    manf_name: VARCHAR(100)
-    manf_address: VARCHAR(200)
-    manf_phone: VARCHAR(20)
-    manf_website: VARCHAR(100)
-    bank_account: VARCHAR(50)
-}
-
-entity Invoice {
-    invoice_id: INTEGER key
-    cust_id: INTEGER
-    order_date: DATE
-    total_amount: DECIMAL
-    shipping_charge: DECIMAL
-    status: VARCHAR(20)
-}
-
-entity Order {
-    order_id: INTEGER key
-    manf_id: INTEGER
-    order_date: DATE
-    total_amount: DECIMAL
-    status: VARCHAR(20)
-}
-
-entity BackOrder {
-    backorder_id: INTEGER key
-    cust_id: INTEGER
-    prod_id: INTEGER
-    request_date: DATE
-    quantity: INTEGER
-    status: VARCHAR(20)
-}
-
-entity Promotion {
-    promo_id: INTEGER key
-    start_date: DATE
-    end_date: DATE
-    description: VARCHAR(200)
-    discount_amount: DECIMAL
-    category: VARCHAR(50)
-}
-
-entity Shipping {
-    shipping_id: INTEGER key
-    invoice_id: INTEGER
-    ship_date: DATE
-    tracking_number: VARCHAR(50)
-    status: VARCHAR(20)
-}
-
-// Relationships based on business rules
-relationship GeneratesInvoice {
-    Customer[1] -> Invoice[0..N]
-}
-
-relationship ManufacturesProduct {
-    Manufacturer[1] -> Product[0..N]
-}
-
-relationship HasBackOrder {
-    Customer[1] -> BackOrder[0..N]
-    Product[1] -> BackOrder[0..N]
-}
-
-relationship PlacesOrder {
-    Manufacturer[1] -> Order[0..N]
-}
-
-relationship ReceivesPromotion {
-    Customer[0..N] -> Promotion[0..N]
-}
-
-relationship RequiresShipping {
-    Invoice[1] -> Shipping[1]
-}
-
-relationship ContainsProduct {
-    Invoice[0..N] -> Product[0..N]
-}
-
-relationship PromotesProduct {
-    Promotion[0..N] -> Product[0..N]
+    id: UUID key
+    name: string
+    website: string
+    country: string
 }
 
 entity Product {
-    Prod_id: INTEGER key
-
+    id: UUID key
+    name: string
+    sku: string
+    category: string
+    scale: string
+    price: decimal
+    manufacturer_id: UUID
+    quantity_on_hand: integer
+    reorder_point: integer
+    reorder_qty: integer
+    is_active: boolean
 }
 
 entity Invoice {
-    Invoice_id: INTEGER key
+    id: UUID key
+    customer_id: UUID
+    invoice_date: date
+    shipping_charge: decimal
+    total_amount: decimal
+    is_paid: boolean
 }
 
-entity Manufacturer {
-    Manufacturer_id: INTEGER key
+entity InvoiceLine {
+    invoice_id: UUID key
+    product_id: UUID key
+    quantity: integer
+    unit_price: decimal
+    line_total: decimal
 }
 
-entity BackOrder {
-    BackOrder_id: INTEGER key
+entity Shipment {
+    id: UUID key
+    invoice_id: UUID
+    ship_date: date
+    carrier: string
+    tracking_no: string
+    status: string
 }
 
-entity Shipping {
-    Shipping_id: INTEGER key
+entity Backorder {
+    id: UUID key
+    customer_id: UUID
+    product_id: UUID
+    quantity: integer
+    created_at: date
+    status: string
 }
 
-// Relationships
-relationship Places {
+entity PurchaseOrder {
+    id: UUID key
+    manufacturer_id: UUID
+    order_date: date
+    status: string
+}
+
+entity PurchaseOrderLine {
+    purchase_order_id: UUID key
+    product_id: UUID key
+    quantity: integer
+    unit_cost: decimal
+}
+
+// Relationships (use arrow + allowed cardinalities)
+relationship Customer_Invoice {
     Customer[1] -> Invoice[0..N]
 }
 
-relationship Orders {
-    Customer[1] -> Product[0..N]
+relationship Invoice_InvoiceLine {
+    Invoice[1] -> InvoiceLine[N]
 }
 
-relationship Makes {
+relationship Product_InvoiceLine {
+    Product[1] -> InvoiceLine[N]
+}
+
+relationship Invoice_Shipment {
+    Invoice[1] -> Shipment[0..1]
+}
+
+relationship Customer_Backorder {
+    Customer[1] -> Backorder[0..N]
+}
+
+relationship Product_Backorder {
+    Product[1] -> Backorder[0..N]
+}
+
+relationship Manufacturer_Product {
     Manufacturer[1] -> Product[0..N]
 }
 
-relationship Contains {
-    Invoice[0..N] -> Product[0..N]
+relationship Manufacturer_PurchaseOrder {
+    Manufacturer[1] -> PurchaseOrder[0..N]
 }
 
-relationship RequestsBackOrder {
-    Customer[1] -> BackOrder[0..N]
+relationship PurchaseOrder_PurchaseOrderLine {
+    PurchaseOrder[1] -> PurchaseOrderLine[N]
 }
 
-relationship NeedsShipping {
-    Invoice[1] -> Shipping[1]
-}
-
-relationship HasBackOrder {
-    Product[1] -> BackOrder[0..N]
-}
+relationship Product_PurchaseOrderLine {
+    Product[1] -> PurchaseOrderLine[N]
+} 
