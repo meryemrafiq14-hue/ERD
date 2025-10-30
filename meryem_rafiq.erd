@@ -1,0 +1,164 @@
+erdiagram UniversityModel
+notation=crowsfoot
+
+erdiagram RCModels
+notation=crowsfoot
+
+entity Customer {
+    cust_id: INTEGER key
+    cust_name: VARCHAR(100)
+    cust_address: VARCHAR(200)
+    cust_phone: VARCHAR(20)
+    cust_email: VARCHAR(100)
+    is_subscriber: BOOLEAN
+    credit_card_info: VARCHAR(100)
+}
+
+entity Product {
+    prod_id: INTEGER key
+    prod_name: VARCHAR(100)
+    prod_type: VARCHAR(50)
+    prod_scale: VARCHAR(10)
+    price: DECIMAL
+    min_quantity: INTEGER
+    current_stock: INTEGER
+    category: VARCHAR(50)
+    last_sale_date: DATE
+    manf_id: INTEGER
+}
+
+entity Manufacturer {
+    manf_id: INTEGER key
+    manf_name: VARCHAR(100)
+    manf_address: VARCHAR(200)
+    manf_phone: VARCHAR(20)
+    manf_website: VARCHAR(100)
+    bank_account: VARCHAR(50)
+}
+
+entity Invoice {
+    invoice_id: INTEGER key
+    cust_id: INTEGER
+    order_date: DATE
+    total_amount: DECIMAL
+    shipping_charge: DECIMAL
+    status: VARCHAR(20)
+}
+
+entity Order {
+    order_id: INTEGER key
+    manf_id: INTEGER
+    order_date: DATE
+    total_amount: DECIMAL
+    status: VARCHAR(20)
+}
+
+entity BackOrder {
+    backorder_id: INTEGER key
+    cust_id: INTEGER
+    prod_id: INTEGER
+    request_date: DATE
+    quantity: INTEGER
+    status: VARCHAR(20)
+}
+
+entity Promotion {
+    promo_id: INTEGER key
+    start_date: DATE
+    end_date: DATE
+    description: VARCHAR(200)
+    discount_amount: DECIMAL
+    category: VARCHAR(50)
+}
+
+entity Shipping {
+    shipping_id: INTEGER key
+    invoice_id: INTEGER
+    ship_date: DATE
+    tracking_number: VARCHAR(50)
+    status: VARCHAR(20)
+}
+
+// Relationships based on business rules
+relationship GeneratesInvoice {
+    Customer[1] -> Invoice[0..N]
+}
+
+relationship ManufacturesProduct {
+    Manufacturer[1] -> Product[0..N]
+}
+
+relationship HasBackOrder {
+    Customer[1] -> BackOrder[0..N]
+    Product[1] -> BackOrder[0..N]
+}
+
+relationship PlacesOrder {
+    Manufacturer[1] -> Order[0..N]
+}
+
+relationship ReceivesPromotion {
+    Customer[0..N] -> Promotion[0..N]
+}
+
+relationship RequiresShipping {
+    Invoice[1] -> Shipping[1]
+}
+
+relationship ContainsProduct {
+    Invoice[0..N] -> Product[0..N]
+}
+
+relationship PromotesProduct {
+    Promotion[0..N] -> Product[0..N]
+}
+
+entity Product {
+    Prod_id: INTEGER key
+
+}
+
+entity Invoice {
+    Invoice_id: INTEGER key
+}
+
+entity Manufacturer {
+    Manufacturer_id: INTEGER key
+}
+
+entity BackOrder {
+    BackOrder_id: INTEGER key
+}
+
+entity Shipping {
+    Shipping_id: INTEGER key
+}
+
+// Relationships
+relationship Places {
+    Customer[1] -> Invoice[0..N]
+}
+
+relationship Orders {
+    Customer[1] -> Product[0..N]
+}
+
+relationship Makes {
+    Manufacturer[1] -> Product[0..N]
+}
+
+relationship Contains {
+    Invoice[0..N] -> Product[0..N]
+}
+
+relationship RequestsBackOrder {
+    Customer[1] -> BackOrder[0..N]
+}
+
+relationship NeedsShipping {
+    Invoice[1] -> Shipping[1]
+}
+
+relationship HasBackOrder {
+    Product[1] -> BackOrder[0..N]
+}
